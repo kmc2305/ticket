@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>お勉強チケット</title>
+  <style>
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: "Rounded Mplus 1c", sans-serif;
+  background-image: url("stars-bg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ログ画面用CSS */
+.log-screen {
+  padding: 16px;
+  max-width: 390px;
+  margin: 0 auto;
+  background-color: #fff;
+  font-family: "Rounded Mplus 1c", sans-serif;
+}
+
+.log-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.log-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px; /* スクロール領域 */
+  overflow-y: auto;
+}
+
+.log-entry {
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  background-color: #fefefe;
+  white-space: pre-line;
+}
+
+.log-reset-button {
+  display: block;
+  margin: 0 auto 12px;
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #ff6666;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* モーダルのオーバーレイ */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* モーダルの中身 */
+.log-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+/* タイトル */
+.log-title {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* ログ内容 */
+.log-content > div {
+  border: 1px solid black;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-family: "Rounded Mplus 1c", sans-serif;
+  font-size: 14px;
+  white-space: pre-line;
+}
+
+
+
+
+    .header {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .log-button {
+      background-color: white;
+      border: 2px solid black;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .ticket-section {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fca36e;
+      margin-bottom: 8px;
+    }
+
+    .ticket-box {
+      background-color: #f9a9c9;
+      width: 100%;
+      max-width: 300px;
+      height: 120px;
+      margin: 0 auto 12px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .action-button {
+      padding: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 110px;
+      line-height: 1.2;
+    }
+
+    .use {
+      background-color: #fca36e;
+      color: white;
+    }
+
+    .add {
+      background-color: #7a93ff;
+      color: white;
+    }
+
+    #useImageRihito, #addImageRihito,
+    #useImageRirika, #addImageRirika {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      width: 100%;
+      max-width: 300px;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+  </style>
+</head>
+
+<body>
+<!-- ログのモーダル -->
+<div id="logOverlay" class="overlay" onclick="closeLog(event)">
+  <div class="log-modal" onclick="event.stopPropagation()">
+    <div class="log-title">しようりれき</div>
+    <button class="log-reset-button" onclick="resetLog()">ログをぜんぶ消す</button>
+    <div id="logContent" class="log-content">
+      <div id="logContainer" class="log-container"></div>
+    </div>
+  </div>
+</div>
+
+  <div class="header">
+    <button class="log-button">ログ⚙️</button>
+  </div>
+
+  <!-- りひとくん -->
+  <div class="ticket-section">
+    <div class="title">りひとくんのチケット</div>
+    <div class="ticket-box">
+      <div id="rihito-count">のこり：？まい<br>？ふん？びょう</div>
+    </div>
+    <div class="button-row">
+      <button class="action-button use" onclick="useRihito()">いちまい<br>つかう</button>
+      <button class="action-button add" onclick="increaseRihito()">いちまい<br>ふやす</button>
+      <button class="action-button cancel" onclick="cancelRihito()">とりけし</button>
+    </div>
+  </div>
+
+  <!-- りりかちゃん -->
+  <div class="ticket-section">
+    <div class="title">りりかちゃんのチケット</div>
+    <div class="ticket-box">
+      <div id="ririka-count">のこり：？まい<br>？ふん？びょう</div>
+    </div>
+    <div class="button-row">
+      <button class="action-button use" onclick="useRirika()">いちまい<br>つかう</button>
+      <button class="action-button add" onclick="increaseRirika()">いちまい<br>ふやす</button>
+      <button class="action-button cancel" onclick="cancelRirika()">とりけし</button>
+    </div>
+  </div>
+
+  <!-- チケット演出画像 -->
+  <img id="useImageRihito" src="Frame 1.png" alt="りひと：使う">
+  <img id="addImageRihito" src="Frame 2.png" alt="りひと：ふやす">
+  <img id="useImageRirika" src="Frame 3.png" alt="りりか：使う">
+  <img id="addImageRirika" src="Frame 4.png" alt="りりか：ふやす">
+
+  <audio id="bgm" src="bgm.mp3" autoplay loop></audio>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 最初のクリックなどで再生許可
+      document.body.addEventListener("click", () => {
+        const bgm = document.getElementById("bgm");
+        if (bgm && bgm.paused) {
+          bgm.volume = 0.2;
+          bgm.play();
+        }
+      }, { once: true }); // 最初の1回だけ
+    });
+  </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  loadState();
+  loadLog();
+
+  const logButton = document.querySelector(".log-button");
+  if (logButton) {
+    logButton.addEventListener("click", () => {
+      playButtonSound();
+      const overlay = document.getElementById("logOverlay");
+      if (overlay) overlay.style.display = "flex";
+    });
+  }
+});
+
+</script>
+
+<script>
+  // ボタン押下回数を保存・読み込み
+  let clickCount = parseInt(localStorage.getItem("clickCount")) || 0;
+
+  function playButtonSound() {
+    clickCount++;
+    localStorage.setItem("clickCount", clickCount);
+
+    const soundFile = (clickCount === 50) ? "sound2.mp3" : "sound1.mp3";
+    const audio = new Audio(soundFile);
+    audio.volume = 0.6;
+    audio.play();
+  }
+</script>
+  <script>
+    // 状態変数
+    let rihitoTickets = 0;
+    let rihitoTimer = null;
+    let remainingSeconds = 0;
+  
+    let ririkaTickets = 0;
+    let ririkaTimer = null;
+    let ririkaSeconds = 0;
+  
+    // 状態の保存
+    function saveState() {
+      localStorage.setItem("rihitoTickets", rihitoTickets);
+      localStorage.setItem("rihitoSeconds", remainingSeconds);
+      localStorage.setItem("ririkaTickets", ririkaTickets);
+      localStorage.setItem("ririkaSeconds", ririkaSeconds);
+    }
+  
+    // 状態の読み込み
+    function loadState() {
+      rihitoTickets = parseInt(localStorage.getItem("rihitoTickets")) || 0;
+      remainingSeconds = parseInt(localStorage.getItem("rihitoSeconds")) || 0;
+      ririkaTickets = parseInt(localStorage.getItem("ririkaTickets")) || 0;
+      ririkaSeconds = parseInt(localStorage.getItem("ririkaSeconds")) || 0;
+  
+      updateCountDisplay();
+      updateRirikaDisplay();
+  
+      if (remainingSeconds > 0) startCountdown(remainingSeconds);
+      if (ririkaSeconds > 0) startRirikaCountdown(ririkaSeconds);
+    }
+  
+    // ログ追加
+    function addLogEntry(who, ticketCount, timeUsedInMin) {
+  const logContainer = document.getElementById("logContainer");
+  if (!logContainer) return;
+
+  const now = new Date();
+  const mmdd = `${(now.getMonth() + 1).toString().padStart(2, "0")}/${now.getDate().toString().padStart(2, "0")}`;
+  const hhmm = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+
+  const text = `${mmdd} ${hhmm}
+${who} チケット利用: ${ticketCount}回
+${who} 時間利用: ${timeUsedInMin}分`;
+
+  const entry = document.createElement("div");
+  entry.className = "log-entry";
+  entry.textContent = text;
+  logContainer.prepend(entry);
+
+  const logs = JSON.parse(localStorage.getItem("ticketLogs")) || [];
+  logs.push(text);
+  localStorage.setItem("ticketLogs", JSON.stringify(logs));
+}
+
+    function loadLog() {
+  const container = document.getElementById("logContainer");
+  const logs = JSON.parse(localStorage.getItem("ticketLogs")) || [];
+  logs.reverse().forEach(log => {
+    const entry = document.createElement("div");
+    entry.className = "log-entry";
+    entry.textContent = log;
+    container.appendChild(entry);
+  });
+}
+
+  
+    // りっくんちゃん
+    function increaseRihito() {
+      playButtonSound();
+      const img = document.getElementById("addImageRihito");
+      img.style.display = "block";
+      img.style.opacity = "1";
+  
+      setTimeout(() => {
+        img.style.opacity = "0";
+        setTimeout(() => img.style.display = "none", 300);
+  
+        rihitoTickets++;
+        updateCountDisplay();
+        saveState();
+      }, 1000);
+    }
+  
+    function useRihito() {
+      playButtonSound();
+      if (rihitoTickets <= 0) return alert("もうチケットがないよ！");
+      if (rihitoTimer !== null) return alert("すでにタイマーが動いてるよ！");
+  
+      const img = document.getElementById("useImageRihito");
+      img.style.display = "block";
+      img.style.opacity = "1";
+  
+      setTimeout(() => {
+        img.style.opacity = "0";
+        setTimeout(() => img.style.display = "none", 300);
+  
+        rihitoTickets--;
+        startCountdown(60 * 60);
+        addLogEntry("りひとくん", 1, 60);
+        saveState();
+      }, 1000);
+    }
+  
+    function startCountdown(seconds) {
+      remainingSeconds = seconds;
+      updateCountDisplay();
+      saveState();
+  
+      rihitoTimer = setInterval(() => {
+        remainingSeconds--;
+        updateCountDisplay();
+        saveState();
+  
+        if (remainingSeconds <= 0) {
+          clearInterval(rihitoTimer);
+          rihitoTimer = null;
+          alert("時間終了！");
+        }
+      }, 1000);
+    }
+  
+    function updateCountDisplay() {
+      const countText = document.getElementById("rihito-count");
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
+      const timeString = `${minutes}ふん${seconds.toString().padStart(2, "0")}びょう`;
+      countText.innerHTML = `のこり：${rihitoTickets}まい<br>${timeString}`;
+    }
+  
+    // ゴブリンちゃん
+    function increaseRirika() {
+      playButtonSound();
+      const img = document.getElementById("addImageRirika");
+      img.style.display = "block";
+      img.style.opacity = "1";
+  
+      setTimeout(() => {
+        img.style.opacity = "0";
+        setTimeout(() => img.style.display = "none", 300);
+  
+        ririkaTickets++;
+        updateRirikaDisplay();
+        saveState();
+      }, 1000);
+    }
+  
+    function useRirika() {
+      playButtonSound();
+      if (ririkaTickets <= 0) return alert("もうチケットがないよ！");
+      if (ririkaTimer !== null) return alert("すでにタイマーが動いてるよ！");
+  
+      const img = document.getElementById("useImageRirika");
+      img.style.display = "block";
+      img.style.opacity = "1";
+  
+      setTimeout(() => {
+        img.style.opacity = "0";
+        setTimeout(() => img.style.display = "none", 300);
+  
+        ririkaTickets--;
+        startRirikaCountdown(60 * 60);
+        addLogEntry("りりかちゃん", 1, 60);
+        saveState();
+      }, 1000);
+    }
+  
+    function startRirikaCountdown(seconds) {
+      ririkaSeconds = seconds;
+      updateRirikaDisplay();
+      saveState();
+  
+      ririkaTimer = setInterval(() => {
+        ririkaSeconds--;
+        updateRirikaDisplay();
+        saveState();
+  
+        if (ririkaSeconds <= 0) {
+          clearInterval(ririkaTimer);
+          ririkaTimer = null;
+          alert("時間終了！");
+        }
+      }, 1000);
+    }
+  
+    function updateRirikaDisplay() {
+      const countText = document.getElementById("ririka-count");
+      const minutes = Math.floor(ririkaSeconds / 60);
+      const seconds = ririkaSeconds % 60;
+      const timeString = `${minutes}ふん${seconds.toString().padStart(2, "0")}びょう`;
+      countText.innerHTML = `のこり：${ririkaTickets}まい<br>${timeString}`;
+    }
+  
+    //ログモーダル表示
+    function closeLog(event) {
+      document.getElementById("logOverlay").style.display = "none";
+    }
+  
+    // タイマー取り消し（りっくん）
+function cancelRihito() {
+  playButtonSound();
+  if (rihitoTimer !== null) {
+    clearInterval(rihitoTimer);
+    rihitoTimer = null;
+  }
+  remainingSeconds = 0;
+  updateCountDisplay();
+  saveState();
+}
+
+// タイマー取り消し（りりか）
+function cancelRirika() {
+  playButtonSound();
+  if (ririkaTimer !== null) {
+    clearInterval(ririkaTimer);
+    ririkaTimer = null;
+  }
+  ririkaSeconds = 0;
+  updateRirikaDisplay();
+  saveState();
+}
+
+function resetLog() {
+  const logContainer = document.getElementById("logContainer");
+  if (!logContainer) return;
+  logContainer.innerHTML = "";
+  localStorage.removeItem("ticketLogs");
+}
+
+</script>  
+</body>
+</html>
