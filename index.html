@@ -532,6 +532,18 @@ function resetLog() {
   localStorage.removeItem("ticketLogs");
 }
 
+document.addEventListener("visibilitychange", () => {
+  const bgm = document.getElementById("bgm");
+  if (!bgm) return;
+
+  if (document.hidden) {
+    bgm.pause();      // タブが非表示になったら停止
+  } else {
+    bgm.play();       // 戻ってきたら再開
+  }
+});
+
+
 </script>  
 </div>
 </body>
