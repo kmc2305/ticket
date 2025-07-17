@@ -306,41 +306,36 @@ html, body {
   <body>
     <div class="background"></div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.body.addEventListener("click", () => {
-        const bgm = document.getElementById("bgm");
-        if (bgm && bgm.paused) {
-          bgm.volume = 0.2;
-          bgm.play();
-        }
-      }, { once: true }); // 最初の1回だけ
-    });
-  </script>
-
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-  }
-  loadState();
-  loadLog();
+  document.addEventListener("DOMContentLoaded", () => {
+    // BGM 自動再生トリガー（初回クリックで再生）
+    document.body.addEventListener("click", () => {
+      const bgm = document.getElementById("bgm");
+      if (bgm && bgm.paused) {
+        bgm.volume = 0.2;
+        bgm.play();
+      }
+    }, { once: true });
 
-  const logButton = document.querySelector(".log-button");
-  if (logButton) {
-    logButton.addEventListener("click", () => {
-      playButtonSound();
-      const overlay = document.getElementById("logOverlay");
-      if (overlay) overlay.style.display = "flex";
-    });
-  }
-});
+    // 通知許可
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
 
-function sendNotification(message) {
-  if (Notification.permission === "granted") {
-    new Notification(message);
-  }
-}
+    // 状態とログの読み込み
+    loadState();
+    loadLog();
+
+    // ログボタン押下でモーダル表示
+    const logButton = document.querySelector(".log-button");
+    if (logButton) {
+      logButton.addEventListener("click", () => {
+        playButtonSound();
+        const overlay = document.getElementById("logOverlay");
+        if (overlay) overlay.style.display = "flex";
+      });
+    }
+  });
 </script>
 
 <script>
@@ -357,6 +352,8 @@ function sendNotification(message) {
     audio.play();
   }
 </script>
+
+document.addEventListener("DOMContentLoaded"
   <script>
     // 状態変数
     let rihitoTickets = 0;
