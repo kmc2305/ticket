@@ -12,6 +12,7 @@ body {
   background: url("stars-bg.png") no-repeat center center fixed;
   background-size: cover;
   font-family: "Rounded Mplus 1c", sans-serif;
+  background: url("haikei.png") no-repeat center center / cover;
 }
 
 .container {
@@ -285,6 +286,34 @@ html, body {
   <img id="addImageRirika" src="Frame 4.png" alt="りりか：ふやす">
 
   <audio id="bgm" src="bgm.mp3" autoplay loop></audio>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      position: relative;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+  
+    /* 背景画像のレイヤー */
+    .background {
+      background-image: url("haikei.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.3; /* ← ここで透明度を調整！0.0〜1.0 */
+      z-index: -1; /* 後ろに配置 */
+    }
+  </style>
+  
+  <body>
+    <div class="background"></div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
