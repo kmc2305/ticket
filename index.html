@@ -320,6 +320,9 @@ html, body {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
   loadState();
   loadLog();
 
@@ -333,6 +336,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+function sendNotification(message) {
+  if (Notification.permission === "granted") {
+    new Notification(message);
+  }
+}
 </script>
 
 <script>
@@ -464,15 +472,16 @@ ${who} 時間利用: ${timeUsedInMin}分`;
         saveState();
   
         if (remainingSeconds <= 0) {
-    clearInterval(rihitoTimer);
-    rihitoTimer = null;
+  clearInterval(rihitoTimer);
+  rihitoTimer = null;
 
-    const audio = new Audio("aream.mp3");
-    audio.volume = 0.8;
-    audio.play();
+  const audio = new Audio("aream.mp3");
+  audio.volume = 0.8;
+  audio.play();
 
-    alert("時間終了！");
-  }
+  alert("時間終了！");
+  sendNotification("りっくんのタイマーが0になりました！");
+}
 
       }, 1000);
     }
@@ -541,6 +550,7 @@ ${who} 時間利用: ${timeUsedInMin}分`;
   audio.play();
 
   alert("時間終了！");
+  sendNotification("りりちゃんのタイマーが0になりました！");
 }
 
       }, 1000);
