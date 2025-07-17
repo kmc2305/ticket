@@ -12,7 +12,6 @@ body {
   background: url("stars-bg.png") no-repeat center center fixed;
   background-size: cover;
   font-family: "Rounded Mplus 1c", sans-serif;
-  background: url("haikei.png") no-repeat center center / cover;
 }
 
 .container {
@@ -164,6 +163,10 @@ html, body {
       padding: 10px;
     }
 
+    .ticket-box:active {
+  filter: brightness(90%);
+}
+
     .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -254,11 +257,11 @@ html, body {
   <!-- りひとくん -->
   <div class="ticket-section">
     <div class="title">りひとくんのチケット</div>
-    <div class="ticket-box">
+    <div class="ticket-box" onclick="togglePauseRihito()">
       <div id="rihito-count">のこり：？まい<br>？ふん？びょう</div>
     </div>
     <div class="button-row">
-      <button id="pauseRihitoButton" class="action-button pause" onclick="pauseRihito()">いったん<br>ポーズ</button>
+
       <button class="action-button use" onclick="useRihito()">いちまい<br>つかう</button>
       <button class="action-button add" onclick="increaseRihito()">いちまい<br>ふやす</button>
       <button class="action-button cancel" onclick="cancelRihito()">とりけし</button>
@@ -268,11 +271,11 @@ html, body {
   <!-- りりかちゃん -->
   <div class="ticket-section">
     <div class="title">りりかちゃんのチケット</div>
-    <div class="ticket-box">
+    <div class="ticket-box" onclick="togglePauseRirika()">
       <div id="ririka-count">のこり：？まい<br>？ふん？びょう</div>
     </div>
     <div class="button-row">
-      <button id="pauseRirikaButton" class="action-button pause" onclick="pauseRirika()">いったん<br>ポーズ</button>
+
       <button class="action-button use" onclick="useRirika()">いちまい<br>つかう</button>
       <button class="action-button add" onclick="increaseRirika()">いちまい<br>ふやす</button>
       <button class="action-button cancel" onclick="cancelRirika()">とりけし</button>
@@ -295,29 +298,13 @@ html, body {
       height: 100vh;
       overflow-x: hidden;
     }
-  
-    /* 背景画像のレイヤー */
-    .background {
-      background-image: url("haikei.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0.3; /* ← ここで透明度を調整！0.0〜1.0 */
-      z-index: -1; /* 後ろに配置 */
-    }
+
   </style>
-  
   <body>
     <div class="background"></div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // 最初のクリックなどで再生許可
       document.body.addEventListener("click", () => {
         const bgm = document.getElementById("bgm");
         if (bgm && bgm.paused) {
@@ -581,46 +568,6 @@ function cancelRihito() {
   saveState();
 }
 
-let rihitoPaused = false;
-
-function pauseRihito() {
-  playButtonSound();
-  const btn = document.getElementById("pauseRihitoButton");
-
-  if (rihitoTimer !== null) {
-    // ポーズする
-    clearInterval(rihitoTimer);
-    rihitoTimer = null;
-    rihitoPaused = true;
-    btn.innerHTML = "さいかい<br>する";
-  } else if (rihitoPaused && remainingSeconds > 0) {
-    // 再開する
-    startCountdown(remainingSeconds);
-    rihitoPaused = false;
-    btn.innerHTML = "いったん<br>ポーズ";
-  }
-}
-
-let ririkaPaused = false;
-
-function pauseRirika() {
-  playButtonSound();
-  const btn = document.getElementById("pauseRirikaButton");
-
-  if (ririkaTimer !== null) {
-    // ポーズする
-    clearInterval(ririkaTimer);
-    ririkaTimer = null;
-    ririkaPaused = true;
-    btn.innerHTML = "さいかい<br>する";
-  } else if (ririkaPaused && ririkaSeconds > 0) {
-    // 再開する
-    startRirikaCountdown(ririkaSeconds);
-    ririkaPaused = false;
-    btn.innerHTML = "いったん<br>ポーズ";
-  }
-}
-
 // タイマー取り消し（りりか）
 function cancelRirika() {
   playButtonSound();
@@ -631,6 +578,34 @@ function cancelRirika() {
   ririkaSeconds = 0;
   updateRirikaDisplay();
   saveState();
+}
+
+let rihitoPaused = false;
+function togglePauseRihito() {
+  if (rihitoTimer !== null) {
+    clearInterval(rihitoTimer);
+    rihitoTimer = null;
+    rihitoPaused = true;
+    playButtonSound();
+  } else if (rihitoPaused && remainingSeconds > 0) {
+    startCountdown(remainingSeconds);
+    rihitoPaused = false;
+    playButtonSound();
+  }
+}
+
+let ririkaPaused = false;
+function togglePauseRirika() {
+  if (ririkaTimer !== null) {
+    clearInterval(ririkaTimer);
+    ririkaTimer = null;
+    ririkaPaused = true;
+    playButtonSound();
+  } else if (ririkaPaused && ririkaSeconds > 0) {
+    startRirikaCountdown(ririkaSeconds);
+    ririkaPaused = false;
+    playButtonSound();
+  }
 }
 
 function resetLog() {
