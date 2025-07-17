@@ -118,9 +118,6 @@ html, body {
   white-space: pre-line;
 }
 
-
-
-
     .header {
       display: flex;
       justify-content: flex-end;
@@ -149,26 +146,40 @@ html, body {
     }
 
     .ticket-box {
-      background-color: #f9a9c9;
+      background-color: #ffef5d;
       width: 100%;
       max-width: 300px;
       height: 120px;
       margin: 0 auto 12px;
       border-radius: 20px;
       display: flex;
+      font-weight: bold;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: white;
+      color: rgb(46, 67, 202);
       font-size: 16px;
       padding: 10px;
     }
 
     .button-row {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.button-row button {
+  flex: 1 1 45%; /* 幅45%で2列になる */
+  min-width: 120px;
+}
+
+
+    .pause {
+  background-color: #ff4f4f;
+  color: white;
+}
+
 
     .action-button {
       padding: 8px;
@@ -204,6 +215,19 @@ html, body {
       opacity: 0;
       transition: opacity 0.3s ease;
     }
+
+
+    @media (max-width: 600px) {
+  .button-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-row button {
+    width: 100%;
+  }
+}
+
   </style>
 </head>
 
@@ -232,6 +256,7 @@ html, body {
       <div id="rihito-count">のこり：？まい<br>？ふん？びょう</div>
     </div>
     <div class="button-row">
+      <button id="pauseRihitoButton" class="action-button pause" onclick="pauseRihito()">いったん<br>ポーズ</button>
       <button class="action-button use" onclick="useRihito()">いちまい<br>つかう</button>
       <button class="action-button add" onclick="increaseRihito()">いちまい<br>ふやす</button>
       <button class="action-button cancel" onclick="cancelRihito()">とりけし</button>
@@ -245,6 +270,7 @@ html, body {
       <div id="ririka-count">のこり：？まい<br>？ふん？びょう</div>
     </div>
     <div class="button-row">
+      <button id="pauseRirikaButton" class="action-button pause" onclick="pauseRirika()">いったん<br>ポーズ</button>
       <button class="action-button use" onclick="useRirika()">いちまい<br>つかう</button>
       <button class="action-button add" onclick="increaseRirika()">いちまい<br>ふやす</button>
       <button class="action-button cancel" onclick="cancelRirika()">とりけし</button>
@@ -418,10 +444,16 @@ ${who} 時間利用: ${timeUsedInMin}分`;
         saveState();
   
         if (remainingSeconds <= 0) {
-          clearInterval(rihitoTimer);
-          rihitoTimer = null;
-          alert("時間終了！");
-        }
+    clearInterval(rihitoTimer);
+    rihitoTimer = null;
+
+    const audio = new Audio("aream.mp3");
+    audio.volume = 0.8;
+    audio.play();
+
+    alert("時間終了！");
+  }
+
       }, 1000);
     }
   
@@ -481,10 +513,16 @@ ${who} 時間利用: ${timeUsedInMin}分`;
         saveState();
   
         if (ririkaSeconds <= 0) {
-          clearInterval(ririkaTimer);
-          ririkaTimer = null;
-          alert("時間終了！");
-        }
+  clearInterval(ririkaTimer);
+  ririkaTimer = null;
+
+  const audio = new Audio("aream.mp3");
+  audio.volume = 0.8;
+  audio.play();
+
+  alert("時間終了！");
+}
+
       }, 1000);
     }
   
@@ -511,6 +549,46 @@ function cancelRihito() {
   remainingSeconds = 0;
   updateCountDisplay();
   saveState();
+}
+
+let rihitoPaused = false;
+
+function pauseRihito() {
+  playButtonSound();
+  const btn = document.getElementById("pauseRihitoButton");
+
+  if (rihitoTimer !== null) {
+    // ポーズする
+    clearInterval(rihitoTimer);
+    rihitoTimer = null;
+    rihitoPaused = true;
+    btn.innerHTML = "さいかい<br>する";
+  } else if (rihitoPaused && remainingSeconds > 0) {
+    // 再開する
+    startCountdown(remainingSeconds);
+    rihitoPaused = false;
+    btn.innerHTML = "いったん<br>ポーズ";
+  }
+}
+
+let ririkaPaused = false;
+
+function pauseRirika() {
+  playButtonSound();
+  const btn = document.getElementById("pauseRirikaButton");
+
+  if (ririkaTimer !== null) {
+    // ポーズする
+    clearInterval(ririkaTimer);
+    ririkaTimer = null;
+    ririkaPaused = true;
+    btn.innerHTML = "さいかい<br>する";
+  } else if (ririkaPaused && ririkaSeconds > 0) {
+    // 再開する
+    startRirikaCountdown(ririkaSeconds);
+    ririkaPaused = false;
+    btn.innerHTML = "いったん<br>ポーズ";
+  }
 }
 
 // タイマー取り消し（りりか）
