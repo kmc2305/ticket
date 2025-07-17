@@ -365,25 +365,31 @@ html, body {
   
     // 状態の保存
     function saveState() {
-      localStorage.setItem("rihitoTickets", rihitoTickets);
-      localStorage.setItem("rihitoSeconds", remainingSeconds);
-      localStorage.setItem("ririkaTickets", ririkaTickets);
-      localStorage.setItem("ririkaSeconds", ririkaSeconds);
-    }
+  localStorage.setItem("rihitoTickets", rihitoTickets);
+  localStorage.setItem("remainingSeconds", remainingSeconds);
+  localStorage.setItem("rihitoEndTime", Date.now() + remainingSeconds * 1000); // ←追加！
+  localStorage.setItem("ririkaTickets", ririkaTickets);
+  localStorage.setItem("ririkaSeconds", ririkaSeconds);
+  localStorage.setItem("ririkaEndTime", Date.now() + ririkaSeconds * 1000); // ←追加！
+}
+
   
-    // 状態の読み込み
-    function loadState() {
-      rihitoTickets = parseInt(localStorage.getItem("rihitoTickets")) || 0;
-      remainingSeconds = parseInt(localStorage.getItem("rihitoSeconds")) || 0;
-      ririkaTickets = parseInt(localStorage.getItem("ririkaTickets")) || 0;
-      ririkaSeconds = parseInt(localStorage.getItem("ririkaSeconds")) || 0;
-  
-      updateCountDisplay();
-      updateRirikaDisplay();
-  
-      if (remainingSeconds > 0) startCountdown(remainingSeconds);
-      if (ririkaSeconds > 0) startRirikaCountdown(ririkaSeconds);
-    }
+function loadState() {
+  rihitoTickets = parseInt(localStorage.getItem("rihitoTickets")) || 0;
+  const endTimeRihito = parseInt(localStorage.getItem("rihitoEndTime")) || 0;
+  const now = Date.now();
+  remainingSeconds = Math.max(Math.floor((endTimeRihito - now) / 1000), 0);
+
+  ririkaTickets = parseInt(localStorage.getItem("ririkaTickets")) || 0;
+  const endTimeRirika = parseInt(localStorage.getItem("ririkaEndTime")) || 0;
+  ririkaSeconds = Math.max(Math.floor((endTimeRirika - now) / 1000), 0);
+
+  updateCountDisplay();
+  updateRirikaDisplay();
+
+  if (remainingSeconds > 0) startCountdown(remainingSeconds);
+  if (ririkaSeconds > 0) startRirikaCountdown(ririkaSeconds);
+}
   
     // ログ追加
     function addLogEntry(who, ticketCount, timeUsedInMin) {
