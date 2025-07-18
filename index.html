@@ -390,6 +390,12 @@ function loadState() {
   if (remainingSeconds > 0) startCountdown(remainingSeconds);
   if (ririkaSeconds > 0) startRirikaCountdown(ririkaSeconds);
 }
+
+function sendNotification(message) {
+  if (Notification.permission === "granted") {
+    new Notification(message);
+  }
+}
   
     // ログ追加
     function addLogEntry(who, ticketCount, timeUsedInMin) {
@@ -638,6 +644,26 @@ document.addEventListener("visibilitychange", () => {
     bgm.pause();      // タブが非表示になったら停止
   } else {
     bgm.play();       // 戻ってきたら再開
+  }
+});
+
+window.addEventListener("focus", () => {
+  const now = Date.now();
+
+  // リヒトの補正
+  const endTimeRihito = parseInt(localStorage.getItem("rihitoEndTime")) || 0;
+  let diffRihito = Math.max(Math.floor((endTimeRihito - now) / 1000), 0);
+  if (rihitoTimer === null && remainingSeconds > 0 && diffRihito > 0) {
+    remainingSeconds = diffRihito;
+    startCountdown(remainingSeconds);
+  }
+
+  // リリカの補正
+  const endTimeRirika = parseInt(localStorage.getItem("ririkaEndTime")) || 0;
+  let diffRirika = Math.max(Math.floor((endTimeRirika - now) / 1000), 0);
+  if (ririkaTimer === null && ririkaSeconds > 0 && diffRirika > 0) {
+    ririkaSeconds = diffRirika;
+    startRirikaCountdown(ririkaSeconds);
   }
 });
 
